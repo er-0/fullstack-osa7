@@ -68,7 +68,7 @@ const App = () => {
         <Route path="/anecdotes/:id" element={<Anecdote anecdote={anecdote} />} />
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes}/>} />
         <Route path="/about" element={<About />} />
-        <Route path="/create" element={<CreateNew addNew={addNew} notif={setNotification} />} />
+        <Route path="/create" element={<CreateNew addNew={addNew} />} />
       </Routes>
       <Footer />
     </div>
