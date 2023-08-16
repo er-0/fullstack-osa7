@@ -33,10 +33,6 @@ const App = () => {
 
   const result = useQuery('blogs', blogService.getAll)
 
-  if ( result.isLoading ) {
-    return <div>loading data...</div>
-  }
-
   const blogs = result.data
 
   const handleMessage = (message, status) => {
@@ -81,22 +77,30 @@ const App = () => {
     }
   }
 
-  const addLike = async (blog) => {
+  const updateBlogMutation = useMutation(blogService.update, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('blogs')
+    }
+  })
+
+  const addLike = (blog) => {
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,
     }
-    await blogService.update(updatedBlog)
-    /*const blogs = await blogService.getAll()
-    setBlogs(blogs)*/
+    updateBlogMutation.mutate(updatedBlog)
   }
 
-  const deleteBlog = async (blog) => {
+  const deleteBlogMutation = useMutation(blogService.deleteBlog, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('blogs')
+    }
+  })
+
+  const deleteBlog = (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
       try {
-        await blogService.deleteBlog(blog.id)
-        /*const blogsAfter = blogs.filter((b) => b.id !== blog.id)
-        setBlogs(blogsAfter)*/
+        deleteBlogMutation.mutate(blog.id)
         handleMessage('Blog deleted', 'success')
       } catch (error) {
         handleMessage('Something went wrong', 'error')
@@ -129,6 +133,10 @@ const App = () => {
       {user.name} logged in <button onClick={handleLogOut}>log out</button>
     </div>
   )
+
+  if ( result.isLoading ) {
+    return <div>loading data...</div>
+  }
 
   return (
     <div>
