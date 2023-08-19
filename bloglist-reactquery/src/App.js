@@ -1,17 +1,24 @@
-import { useState, useEffect, useRef, useContext } from 'react'
+import { useEffect, useRef, useContext } from 'react'
 import Notification from './components/notification'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
+import BlogView from './components/BlogView'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import NotificationContext from './NotificationContext'
+import UserContext from './UserContext'
+import { getUsers } from './services/users'
+import { Userlist } from './components/Userlist'
+import { User } from './components/User'
+import { Routes, Route, Link, useMatch } from 'react-router-dom'
+
 
 const App = () => {
-  const [user, setUser] = useState(null)
-  const [notif, dispatch] = useContext(NotificationContext)
+  const [user, userDispatch] = useContext(UserContext)
+  const [notif, notifDispatch] = useContext(NotificationContext)
 
   const blogFormRef = useRef()
   const queryClient = useQueryClient()
@@ -20,7 +27,7 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      userDispatch({ type: 'LOGIN', payload: user })
       blogService.setToken(user.token)
     }
   }, [])
@@ -31,14 +38,13 @@ const App = () => {
     },
   })
 
-  const result = useQuery('blogs', blogService.getAll)
-
-  const blogs = result.data
+  const blogresult = useQuery('blogs', blogService.getAll)
+  const blogs = blogresult.data
 
   const handleMessage = (message, status) => {
-    dispatch({ type: 'TEXT', payload: {  message, status } })
+    notifDispatch({ type: 'TEXT', payload: {  message, status } })
     setTimeout(() => {
-      dispatch({ type: 'RESET' })
+      notifDispatch({ type: 'RESET' })
     }, 5000)
   }
 
@@ -50,7 +56,7 @@ const App = () => {
       })
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      setUser(user)
+      userDispatch({ type: 'LOGIN', payload: user })
       handleMessage('Login successful', 'success')
     } catch (exception) {
       handleMessage('Wrong username or password', 'error')
@@ -60,7 +66,7 @@ const App = () => {
   const handleLogOut = async (event) => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    userDispatch({ type: 'LOGOUT' })
     handleMessage('Logout successful', 'success')
   }
 
@@ -109,23 +115,32 @@ const App = () => {
   }
 
   const showBlogs = () => {
-    return (
-      <div>
-        <br />
-        {blogs
-          .sort((a, b) => b.likes - a.likes)
-          .map((blog) => (
-            <Blog
-              key={blog.id}
-              user={user}
-              blog={blog}
-              deleteBlog={() => deleteBlog(blog)}
-              addLike={() => addLike(blog)}
-            />
-          ))}
-      </div>
-    )
+    if (user)
+      return (
+        <div>
+          <Togglable buttonLabel="add blog" ref={blogFormRef}>
+            <BlogForm addBlog={addBlog} />
+          </Togglable>
+          <br />
+          {blogs
+            .sort((a, b) => b.likes - a.likes)
+            .map((blog) => (
+              <div key={blog.id}>
+                <Link to={`/blogs/${blog.id}`}>{
+                  <Blog
+                    key={blog.id}
+                    blog={blog}
+                  />}
+                </Link>
+              </div>
+            ))}
+        </div>
+      )
+    else return null
   }
+
+  const usersresult = useQuery('users', getUsers)
+  const users = usersresult.data
 
   const showHeader = () => (
     <div>
@@ -134,7 +149,12 @@ const App = () => {
     </div>
   )
 
-  if ( result.isLoading ) {
+  const match = useMatch('/blogs/:id')
+  const blog = match
+    ? blogs.find(blog => blog.id === match.params.id) //works unless you refresh
+    : null
+
+  if ( blogresult.isLoading ) {
     return <div>loading data...</div>
   }
 
@@ -144,12 +164,18 @@ const App = () => {
       {!user && <LoginForm logIn={logIn} />}
       {user && showHeader()}
       <br />
-      {user && (
-        <Togglable buttonLabel="add blog" ref={blogFormRef}>
-          <BlogForm addBlog={addBlog} />
-        </Togglable>
-      )}
-      {user && showBlogs()}
+      <Routes>
+        <Route path="/users" element={<Userlist users={users} />} />
+        <Route path="/" element={showBlogs()} />
+        <Route path="/users/:id" element={<User users={users} />} />
+        <Route path="/blogs/:id" element={
+          <BlogView
+            user={user}
+            blog={blog}
+            deleteBlog={() => deleteBlog(blog)}
+            addLike={() => addLike(blog)} />
+        }/>
+      </Routes>
     </div>
   )
 }
