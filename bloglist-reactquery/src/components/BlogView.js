@@ -1,4 +1,6 @@
-const BlogView = ({ user, blog, deleteBlog, addLike }) => {
+import CommentForm from './CommentForm'
+
+const BlogView = ({ user, blog, deleteBlog, addLike, addComment }) => {
   if (!blog)
     return null
   return (
@@ -14,8 +16,16 @@ const BlogView = ({ user, blog, deleteBlog, addLike }) => {
           <button onClick={deleteBlog}>delete</button>
         </div>
       )}
+      <h3>comments</h3>
+      <CommentForm addComment={addComment} blog={blog}/>
+      {blog.comments
+        .map((comment) => (
+          <li key={comment}>
+            {comment}
+          </li>))
+      }
     </div>
   )
-}
+} //comments should have their own ids for the key
 
 export default BlogView

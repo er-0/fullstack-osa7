@@ -38,8 +38,13 @@ const App = () => {
     },
   })
 
+  const usersresult = useQuery('users', getUsers)
+  const users = usersresult.data
+
   const blogresult = useQuery('blogs', blogService.getAll)
   const blogs = blogresult.data
+
+  const match = useMatch('/blogs/:id') //used after the blogResult.isLoading return
 
   const handleMessage = (message, status) => {
     notifDispatch({ type: 'TEXT', payload: {  message, status } })
@@ -97,6 +102,17 @@ const App = () => {
     updateBlogMutation.mutate(updatedBlog)
   }
 
+  const addCommentMutation = useMutation(blogService.addComment, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('blogs')
+    }
+  })
+
+  const addComment = (blogId, comment) => {
+    const updatedBlog = { blogId, comment }
+    addCommentMutation.mutate(updatedBlog)
+  }
+
   const deleteBlogMutation = useMutation(blogService.deleteBlog, {
     onSuccess: () => {
       queryClient.invalidateQueries('blogs')
@@ -139,31 +155,33 @@ const App = () => {
     else return null
   }
 
-  const usersresult = useQuery('users', getUsers)
-  const users = usersresult.data
-
-  const showHeader = () => (
-    <div>
-      <h1>blogs</h1>
-      {user.name} logged in <button onClick={handleLogOut}>log out</button>
-    </div>
-  )
-
-  const match = useMatch('/blogs/:id')
-  const blog = match
-    ? blogs.find(blog => blog.id === match.params.id) //works unless you refresh
-    : null
+  const showHeader = () => {
+    const padding = {
+      padding: 5
+    }
+    return (
+      <div>
+        <Link style={padding} to="/">blogs</Link>
+        <Link style={padding} to="/users">users</Link>
+        {user.name} logged in <button onClick={handleLogOut}>log out</button>
+      </div>
+    )
+  }
 
   if ( blogresult.isLoading ) {
     return <div>loading data...</div>
   }
 
+  const blog = match
+    ? blogs.find(blog => blog.id === match.params.id)
+    : null
+
   return (
     <div>
-      <Notification notif={notif} />
-      {!user && <LoginForm logIn={logIn} />}
       {user && showHeader()}
-      <br />
+      <Notification notif={notif} />
+      <h1>blog app</h1>
+      {!user && <LoginForm logIn={logIn} />}
       <Routes>
         <Route path="/users" element={<Userlist users={users} />} />
         <Route path="/" element={showBlogs()} />
@@ -173,7 +191,8 @@ const App = () => {
             user={user}
             blog={blog}
             deleteBlog={() => deleteBlog(blog)}
-            addLike={() => addLike(blog)} />
+            addLike={() => addLike(blog)}
+            addComment={addComment} />
         }/>
       </Routes>
     </div>
