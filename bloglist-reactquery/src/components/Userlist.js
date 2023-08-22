@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
+import { Table } from 'react-bootstrap'
 
 export const Userlist = ({ users }) => {
   if (users)
     return (
       <div>
-        <h2>Users</h2>
-        <table>
+        <h2 className="display-6">users</h2>
+        <Table striped>
           <thead><tr><th></th><th>blogs created</th></tr></thead>
           <tbody>
             {users
@@ -14,7 +15,7 @@ export const Userlist = ({ users }) => {
                   <td>{user.blogs.length}</td></tr>)
             }
           </tbody>
-        </table>
+        </Table>
       </div>
     )
 }

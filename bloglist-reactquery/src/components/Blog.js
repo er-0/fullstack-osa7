@@ -2,11 +2,13 @@ const Blog = ({ blog }) => {
 
   const blogStyle = {
     paddingTop: 10,
-    paddingLeft: 5,
+    paddingLeft: 10,
     paddingBottom: 10,
     border: 'solid',
     borderWidth: 1,
+    borderColor: '#bbecd1',
     marginBottom: 5,
+    color: 'black',
   }
 
   return (

@@ -6,6 +6,7 @@ const CommentForm = ({ addComment, blog }) => {
   const addNewComment = async (event) => {
     event.preventDefault()
     addComment(blog.id, comment)
+    setComment('')
   }
 
   return (
@@ -17,7 +18,7 @@ const CommentForm = ({ addComment, blog }) => {
           id="Blogcomment"
           onChange={({ target }) => setComment(target.value)}
         />
-        <button type="submit" id="commentformsubmit">
+        <button className="btn" type="submit" id="commentformsubmit">
           add comment
         </button>
       </form>

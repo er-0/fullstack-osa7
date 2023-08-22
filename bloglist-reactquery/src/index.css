@@ -1,13 +1,23 @@
-.success {
-    color: green;
-    border-style: solid;
-    padding: 5px;
-    margin-bottom: 15px;
+.btn {
+    background: #bbecd1;
+    margin: 5px;
 }
 
-.error {
-    color: red;
-    border-style: solid;
-    padding: 5px;
-    margin-bottom: 15px;
+.mr-auto {
+    align-items: baseline
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    text-shadow: #bbecd1;
+}
+
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 6px 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
 }

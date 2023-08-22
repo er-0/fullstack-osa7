@@ -1,5 +1,6 @@
 import { useEffect, useRef, useContext } from 'react'
 import Notification from './components/notification'
+import ShowHeader from './components/Header'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
@@ -14,7 +15,6 @@ import { getUsers } from './services/users'
 import { Userlist } from './components/Userlist'
 import { User } from './components/User'
 import { Routes, Route, Link, useMatch } from 'react-router-dom'
-
 
 const App = () => {
   const [user, userDispatch] = useContext(UserContext)
@@ -64,7 +64,7 @@ const App = () => {
       userDispatch({ type: 'LOGIN', payload: user })
       handleMessage('Login successful', 'success')
     } catch (exception) {
-      handleMessage('Wrong username or password', 'error')
+      handleMessage('Wrong username or password', 'danger')
     }
   }
 
@@ -84,7 +84,7 @@ const App = () => {
         'success'
       )
     } catch (error) {
-      handleMessage('Something went wrong, check form for errors', 'error')
+      handleMessage('Something went wrong, check form for errors', 'danger')
     }
   }
 
@@ -125,7 +125,7 @@ const App = () => {
         deleteBlogMutation.mutate(blog.id)
         handleMessage('Blog deleted', 'success')
       } catch (error) {
-        handleMessage('Something went wrong', 'error')
+        handleMessage('Something went wrong', 'danger')
       }
     }
   }
@@ -155,19 +155,6 @@ const App = () => {
     else return null
   }
 
-  const showHeader = () => {
-    const padding = {
-      padding: 5
-    }
-    return (
-      <div>
-        <Link style={padding} to="/">blogs</Link>
-        <Link style={padding} to="/users">users</Link>
-        {user.name} logged in <button onClick={handleLogOut}>log out</button>
-      </div>
-    )
-  }
-
   if ( blogresult.isLoading ) {
     return <div>loading data...</div>
   }
@@ -177,10 +164,10 @@ const App = () => {
     : null
 
   return (
-    <div>
-      {user && showHeader()}
+    <div className="container">
+      {user && <ShowHeader user={user} handleLogOut={handleLogOut} />}
       <Notification notif={notif} />
-      <h1>blog app</h1>
+      <h1 className="display-6">BLOG APP</h1>
       {!user && <LoginForm logIn={logIn} />}
       <Routes>
         <Route path="/users" element={<Userlist users={users} />} />

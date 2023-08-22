@@ -1,8 +1,12 @@
+import { Alert } from 'react-bootstrap'
+
 const Notification = ({ notif }) => {
   if (notif === null) {
     return null
   }
-  return <div className={notif.status}>{notif.message}</div>
+  return <Alert variant={notif.status}>
+    {notif.message}
+  </Alert>
 }
 
 export default Notification
